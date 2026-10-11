@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Starship Tower · Mechazilla Catch Theater</title>
+<meta name="theme-color" content="#07080c">
+<meta name="description" content="Offline EXAMPLE SpaceX Mechazilla / chopsticks catch theater + fleet board. Demo data only — not live telemetry.">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<canvas id="bgStars" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="brand">
+    <span class="crest" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="48" height="48">
+        <defs>
+          <linearGradient id="flameG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffb347"/><stop offset="0.55" stop-color="#ff6b2c"/><stop offset="1" stop-color="#c43a12"/>
+          </linearGradient>
+          <linearGradient id="steelG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#c8d0dc"/><stop offset="1" stop-color="#6a7384"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="60" height="60" rx="10" fill="#0c0e14" stroke="url(#flameG)" stroke-width="2"/>
+        <rect x="28" y="10" width="8" height="38" rx="1.5" fill="url(#steelG)"/>
+        <path d="M18 28 L28 22 L28 34 Z" fill="url(#steelG)" opacity=".85"/>
+        <path d="M46 28 L36 22 L36 34 Z" fill="url(#steelG)" opacity=".85"/>
+        <rect x="24" y="46" width="16" height="6" rx="1" fill="url(#flameG)"/>
+        <circle cx="32" cy="52" r="2" fill="#ffd28a"/>
+      </svg>
+    </span>
+    <div>
+      <h1>Starship Tower</h1>
+      <p class="sub">Mechazilla Catch Theater · EXAMPLE / DEMO · Offline wall display</p>
+    </div>
+  </div>
+  <div class="topmeta">
+    <span class="pill demo" id="demoBadge">EXAMPLE</span>
+    <span class="pill soft" id="phasePill">PAD IDLE</span>
+    <span class="pill clock" id="missionClock">T−00:00</span>
+    <button id="btnWall" class="ghost" type="button" title="Wall display mode">Wall</button>
+    <button id="btnHelp" class="ghost" type="button" title="About / shortcuts">?</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Tower screens">
+  <button role="tab" class="tab on" data-tab="tower" aria-selected="true" type="button">Tower</button>
+  <button role="tab" class="tab" data-tab="countdown" aria-selected="false" type="button">Countdown</button>
+  <button role="tab" class="tab" data-tab="fleet" aria-selected="false" type="button">Fleet Board</button>
+  <button role="tab" class="tab" data-tab="starlink" aria-selected="false" type="button">Starlink Strip</button>
+  <button role="tab" class="tab" data-tab="telemetry" aria-selected="false" type="button">Telemetry</button>
+</nav>
+
+<main class="stage">
+  <!-- TOWER -->
+  <section id="panel-tower" class="panel on" role="tabpanel">
+    <div class="tower-grid">
+      <div class="canvas-wrap theater">
+        <canvas id="towerCanvas" width="1100" height="680"></canvas>
+        <div class="canvas-overlay">
+          <span class="big-sim">EXAMPLE · NOT LIVE</span>
+          <span class="hud-tl" id="hudPhase">PHASE · PAD IDLE</span>
+          <span class="hud-tr" id="hudOutcome">OUTCOME · —</span>
+          <span class="hud-bl" id="hudArms">CHOPSTICKS · STOWED</span>
+          <span class="hud-br" id="hudBooster">BOOSTER · ON PAD</span>
+        </div>
+        <div class="flame-glow" id="flameGlow" aria-hidden="true"></div>
+      </div>
+      <aside class="tower-side">
+        <div class="card glow">
+          <h3>Catch Sequence</h3>
+          <p class="card-note">User-controlled EXAMPLE theater. Public Mechazilla / chopsticks concepts only.</p>
+          <ol class="phases" id="phaseList">
+            <li data-p="idle" class="on">1 · Pad idle</li>
+            <li data-p="liftoff">2 · Liftoff trail</li>
+            <li data-p="boostback">3 · Boostback</li>
+            <li data-p="catch">4 · Catch attempt</li>
+            <li data-p="result">5 · Celebrate / Miss</li>
+          </ol>
+          <div class="transport">
+            <button id="btnPlay" class="primary" type="button">▶ Run Sequence</button>
+            <button id="btnReset" class="ghost" type="button">↺ Reset</button>
+          </div>
+          <div class="outcome-row">
+            <button id="btnCatch" class="accent" type="button" title="Force celebrate ending">Catch</button>
+            <button id="btnMiss" class="ghost danger" type="button" title="Force miss ending">Miss</button>
+            <label class="speed"><span>Speed</span>
+              <select id="speedSel" aria-label="Playback speed">
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+                <option value="3">3×</option>
+              </select>
+            </label>
+          </div>
+          <input type="range" id="towerScrub" min="0" max="1000" value="0" aria-label="Scrub catch sequence">
+          <div class="tl-labels"><span>Idle</span><span>Lift</span><span>Back</span><span>Catch</span><span>End</span></div>
+        </div>
+        <div class="card">
+          <h3>Mission Tag</h3>
+          <div class="mission-tag">
+            <span class="tag-name">EXAMPLE Flight Demo</span>
+            <span class="tag-serial">S-DEMO-1 · B-DEMO-1</span>
+            <span class="tag-site">Starbase · Mechazilla (demo)</span>
+          </div>
+        </div>
+        <div class="card soft">
+          <h3>Shortcuts</h3>
+          <p class="hint"><kbd>Space</kbd> run/pause · <kbd>R</kbd> reset · <kbd>C</kbd>/<kbd>M</kbd> catch/miss · <kbd>1–5</kbd> tabs · <kbd>W</kbd> wall</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section id="panel-countdown" class="panel" role="tabpanel" hidden>
+    <div class="count-hero">
+      <div class="count-banner">EXAMPLE MISSION CLOCK · NOT A REAL LAUNCH WINDOW</div>
+      <h2 class="mission-title">EXAMPLE Flight Demo</h2>
+      <p class="mission-sub">Demo scrub timeline · labeled EXAMPLE throughout · no live T−</p>
+      <div class="big-clock" id="bigClock">T−00:10:00</div>
+      <div class="clock-meta">
+        <span id="clockPhaseLabel">Pre-flight hold (demo)</span>
+        <span class="sep">·</span>
+        <span id="clockProgress">0%</span>
+      </div>
+      <div class="count-scrub">
+        <input type="range" id="countScrub" min="0" max="1000" value="0" aria-label="Scrub EXAMPLE mission clock">
+        <div class="tl-labels wide">
+          <span>T−10m</span><span>T−2m</span><span>T−0</span><span>T+2m</span><span>T+8m</span>
+        </div>
+      </div>
+      <div class="count-transport">
+        <button id="btnCountPlay" class="primary" type="button">▶ Advance Clock</button>
+        <button id="btnCountReset" class="ghost" type="button">↺ T−10:00</button>
+        <label class="speed"><span>Rate</span>
+          <select id="countSpeed" aria-label="Clock rate">
+            <option value="1">1×</option>
+            <option value="10" selected>10×</option>
+            <option value="30">30×</option>
+            <option value="60">60×</option>
+          </select>
+        </label>
+      </div>
+      <div class="milestone-strip" id="milestoneStrip"></div>
+      <p class="demo-foot">All times are fictional scrub markers for the wall display. SpaceX product names used for atmosphere only.</p>
+    </div>
+  </section>
+
+  <!-- FLEET BOARD -->
+  <section id="panel-fleet" class="panel" role="tabpanel" hidden>
+    <div class="fleet-head">
+      <h2>Fleet Board</h2>
+      <span class="pill demo">DEMO SERIALS</span>
+      <p>EXAMPLE Starship / Super Heavy vehicles — placeholder status chips, not a live stack or flight roster.</p>
+    </div>
+    <div class="fleet-grid" id="fleetGrid"></div>
+  </section>
+
+  <!-- STARLINK STRIP -->
+  <section id="panel-starlink" class="panel" role="tabpanel" hidden>
+    <div class="sl-layout">
+      <div class="canvas-wrap sl-canvas-wrap">
+        <canvas id="slCanvas" width="1100" height="420"></canvas>
+        <div class="canvas-overlay">
+          <span class="big-sim">STARLINK · DEMO CONSTELLATION</span>
+          <span class="hud-bl">No fake live orbital elements</span>
+        </div>
+      </div>
+      <aside class="sl-side">
+        <div class="card glow">
+          <h3>EXAMPLE Batch Facts</h3>
+          <ul class="batch-list" id="batchList"></ul>
+        </div>
+        <div class="card">
+          <h3>Strip Controls</h3>
+          <div class="transport">
+            <button id="btnSlSpin" class="primary" type="button">▶ Animate</button>
+            <button id="btnSlPause" class="ghost" type="button">❚❚ Pause</button>
+          </div>
+          <label class="slider-lab">Density
+            <input type="range" id="slDensity" min="20" max="120" value="64" aria-label="Demo satellite density">
+          </label>
+          <p class="card-note">Animated dots only — decorative DEMO, not ephemeris or tracking.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- TELEMETRY -->
+  <section id="panel-telemetry" class="panel" role="tabpanel" hidden>
+    <div class="telem-head">
+      <h2>Telemetry Desk</h2>
+      <span class="pill demo">FAKE · LABELED EXAMPLE</span>
+      <p>Gauges driven by the Tower animation phase. Values are theatrical, not flight data.</p>
+    </div>
+    <div class="telem-grid">
+      <div class="gauge-card" data-g="speed">
+        <canvas class="gauge" id="gSpeed" width="220" height="220"></canvas>
+        <div class="g-label">Speed <span class="ex">EXAMPLE</span></div>
+        <div class="g-val" id="vSpeed">0 km/h</div>
+      </div>
+      <div class="gauge-card" data-g="alt">
+        <canvas class="gauge" id="gAlt" width="220" height="220"></canvas>
+        <div class="g-label">Altitude <span class="ex">EXAMPLE</span></div>
+        <div class="g-val" id="vAlt">0 km</div>
+      </div>
+      <div class="gauge-card" data-g="prop">
+        <canvas class="gauge" id="gProp" width="220" height="220"></canvas>
+        <div class="g-label">Propellant <span class="ex">EXAMPLE</span></div>
+        <div class="g-val" id="vProp">100%</div>
+      </div>
+      <div class="gauge-card" data-g="offset">
+        <canvas class="gauge" id="gOffset" width="220" height="220"></canvas>
+        <div class="g-label">Tower Offset <span class="ex">EXAMPLE</span></div>
+        <div class="g-val" id="vOffset">— m</div>
+      </div>
+    </div>
+    <div class="telem-strip">
+      <div class="spark-card">
+        <h3>Phase Trace <span class="ex">DEMO</span></h3>
+        <canvas id="sparkCanvas" width="980" height="140"></canvas>
+      </div>
+      <div class="telem-side card">
+        <h3>Linked Phase</h3>
+        <p id="telemPhase">PAD IDLE</p>
+        <p class="card-note">Scrub or run the Tower sequence — these EXAMPLE gauges follow.</p>
+        <button id="btnTelemSync" class="primary" type="button">Jump to Tower</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>Starship Tower · TokenMax burn · Offline</span>
+  <span class="sep">·</span>
+  <span>Not affiliated with SpaceX · All mission data EXAMPLE / DEMO</span>
+</footer>
+
+<dialog id="helpDlg">
+  <form method="dialog" class="help-box">
+    <h2>Starship Tower</h2>
+    <p>Offline Mechazilla / chopsticks catch theater for Boyd’s wall. Dark industrial UI with flame accents. Every mission clock, serial, and gauge is labeled <strong>EXAMPLE</strong> or <strong>DEMO</strong>.</p>
+    <ul>
+      <li><kbd>1</kbd>–<kbd>5</kbd> screens · <kbd>Space</kbd> run/pause · <kbd>R</kbd> reset</li>
+      <li><kbd>C</kbd> celebrate catch · <kbd>M</kbd> miss · <kbd>W</kbd> wall mode</li>
+    </ul>
+    <p class="fine">Public product names (Starship, Super Heavy, Mechazilla, chopsticks, Starlink) for atmosphere only. No live launch times or invented current flight numbers as fact.</p>
+    <button class="primary" value="ok" type="submit">Got it</button>
+  </form>
+</dialog>
+
+<script>/*__APP__*/</script>
+</body>
+</html>
